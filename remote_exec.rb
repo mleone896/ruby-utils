@@ -78,9 +78,6 @@ password = options.password
     hosts = options.server
   end
 # these need to be global for the scope of class methods
-options.each do |j|
-    pp j
-end
 $rset = Rye::Set.new "setname", :password_prompt => false, :user => "mleone", \
     :parallel => false, :password => "#{password}"
 $rset.add_boxes hosts
