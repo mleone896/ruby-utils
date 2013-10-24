@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+
+
 require 'rubygems'
 require 'optparse'
 require 'pp'
@@ -43,7 +45,7 @@ class ParseArgs
 end # close class
 
 
-class FileOperations
+class FileOperations < Rye::Box
   attr_accessor :file, :path
   def initalize(file, path)
       @file = file
@@ -54,16 +56,17 @@ class FileOperations
   end
 
   def file_download(file, path)
-      puts $rset.hostname
-      $rset.file_download "#{path}/#{file}", file
-      ret = File.exists?("#{file}")
-           if !ret
-               puts "#{file} did not transfer correctly"
-               exit 2
-           end
+      puts $rset.file_download "#{path}/#{file}", file
   end
-
+  def pinfo(msg)
+    direction, progress, junk, is_done = *msg.tr('[]','').split(' ')
+    name, bytes_sent, bytes_total, junk = *progress.tr('/',' ').split(' ')
+    # ... where all dreams come true ...
+    super # call the original Rye::Box#pinfo method
+  end
 end
+
+#end
 
 options = ParseArgs.parse(ARGV)
 fileoperators = FileOperations.new
@@ -77,10 +80,10 @@ password = options.password
   else
     hosts = options.server
   end
-# these need to be global for the scope of class methods
 $rset = Rye::Set.new "setname", :password_prompt => false, :user => "mleone", \
-    :parallel => false, :password => "#{password}"
+    :parallel => false, :password => "#{password}", :parallel => true, :info => true
 $rset.add_boxes hosts
+
 
  if !options.path.nil? and !options.file.nil? and options.flow == "upload"
    fileoperators.file_upload(options.file, options.path)
